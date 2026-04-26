@@ -51,6 +51,7 @@ export const oauthTokens = pgTable("oauth_tokens", {
   tokenType: text("token_type"),
   expiryDate: bigint("expiry_date", { mode: "number" }),
   email: text("email"),
+  selectedCalendarIds: text("selected_calendar_ids").array(),
 });
 
 export type Category = typeof categories.$inferSelect;

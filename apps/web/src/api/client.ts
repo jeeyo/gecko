@@ -38,6 +38,14 @@ export type Note = {
   updatedAt: string;
 };
 
+export type GoogleCalendar = {
+  id: string;
+  summary: string;
+  primary: boolean;
+  backgroundColor?: string;
+  foregroundColor?: string;
+};
+
 export type GoogleEvent = {
   id: string;
   title: string;
@@ -51,8 +59,8 @@ export type GoogleEvent = {
 };
 
 export type AuthStatus =
-  | { connected: true; configured: true; email?: string }
-  | { connected: false; configured: boolean; email?: string };
+  | { connected: true; configured: true; email?: string; selectedCalendarIds: string[] }
+  | { connected: false; configured: boolean; email?: string; selectedCalendarIds?: string[] };
 
 const BASE = "/api";
 
@@ -76,6 +84,17 @@ export const api = {
   authStartUrl: () => `${BASE}/auth/google/start`,
 
   categories: () => request<Category[]>("/categories"),
+
+  listCalendars: () =>
+    request<{ calendars: GoogleCalendar[] } | { error: string; calendars: GoogleCalendar[] }>(
+      "/calendar/list",
+    ),
+
+  setSelectedCalendars: (ids: string[]) =>
+    request<{ ok: true }>("/calendar/selected", {
+      method: "POST",
+      body: JSON.stringify({ ids }),
+    }),
 
   events: (from: string, to: string) =>
     request<{ events: GoogleEvent[] } | { error: string; events: GoogleEvent[] }>(

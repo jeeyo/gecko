@@ -78,5 +78,6 @@ export async function authStatus() {
     connected: Boolean(stored?.refreshToken),
     configured: true,
     email: stored?.email ?? undefined,
+    selectedCalendarIds: stored?.selectedCalendarIds ?? [],
   } as const;
 }

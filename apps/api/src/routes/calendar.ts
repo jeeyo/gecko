@@ -70,6 +70,7 @@ export const calendarRoutes = new Elysia({ prefix: "/calendar" })
             });
             return (res.data.items ?? []).map((e) => ({
               id: e.id!,
+              calendarId,
               title: e.summary ?? "(no title)",
               start: e.start?.dateTime ?? e.start?.date ?? null,
               end: e.end?.dateTime ?? e.end?.date ?? null,

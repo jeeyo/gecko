@@ -48,6 +48,7 @@ export type GoogleCalendar = {
 
 export type GoogleEvent = {
   id: string;
+  calendarId: string;
   title: string;
   start: string | null;
   end: string | null;

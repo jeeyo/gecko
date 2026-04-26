@@ -6,6 +6,7 @@ import type { EventInput } from "@fullcalendar/core";
 import { useEvents } from "@/hooks/useEvents";
 import { useExpensesRange } from "@/hooks/useExpenses";
 import { useCategories } from "@/hooks/useCategories";
+import { useCalendars } from "@/hooks/useCalendars";
 import { formatCents } from "@/lib/currency";
 
 type Range = { start: Date; end: Date };
@@ -32,25 +33,34 @@ export function CalendarView({ readOnly = true, onEventClick }: Props) {
   const { data: events = [] } = useEvents(fromIso, toIso);
   const { data: expenses = [] } = useExpensesRange(fromDay, toDay);
   const { data: categories = [] } = useCategories();
+  const { data: calendars = [] } = useCalendars();
 
   const categoryById = useMemo(
     () => Object.fromEntries(categories.map((c) => [c.id, c])),
     [categories],
   );
 
+  const calendarColorById = useMemo(
+    () => Object.fromEntries(calendars.map((c) => [c.id, c.backgroundColor])),
+    [calendars],
+  );
+
   const fcEvents = useMemo<EventInput[]>(() => {
     const googleEvents: EventInput[] = events
       .filter((e) => e.start)
-      .map((e) => ({
-        id: `g:${e.id}`,
-        title: e.title,
-        start: e.start ?? undefined,
-        end: e.end ?? undefined,
-        allDay: e.allDay,
-        backgroundColor: "#1e40af",
-        borderColor: "#1e40af",
-        extendedProps: { type: "event", refId: e.id },
-      }));
+      .map((e) => {
+        const color = calendarColorById[e.calendarId] ?? "#1e40af";
+        return {
+          id: `g:${e.id}`,
+          title: e.title,
+          start: e.start ?? undefined,
+          end: e.end ?? undefined,
+          allDay: e.allDay,
+          backgroundColor: color,
+          borderColor: color,
+          extendedProps: { type: "event", refId: e.id },
+        };
+      });
     const expenseEvents: EventInput[] = expenses.map((x) => {
       const cat = categoryById[x.categoryId];
       return {

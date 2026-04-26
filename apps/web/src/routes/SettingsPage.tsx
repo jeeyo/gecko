@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCalendars } from "@/hooks/useCalendars";
 
 export function SettingsPage() {
   const queryClient = useQueryClient();
@@ -10,13 +11,7 @@ export function SettingsPage() {
     queryFn: () => api.authStatus(),
   });
 
-  const { data: calData, isLoading: isLoadingCals } = useQuery({
-    queryKey: ["calendars"],
-    queryFn: () => api.listCalendars(),
-    enabled: !!data?.connected,
-  });
-
-  const calendars = "calendars" in (calData ?? {}) ? calData?.calendars ?? [] : [];
+  const { data: calendars = [], isLoading: isLoadingCals } = useCalendars();
 
   const mutation = useMutation({
     mutationFn: (ids: string[]) => api.setSelectedCalendars(ids),

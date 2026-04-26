@@ -13,6 +13,7 @@ export const env = {
   PORT: Number(process.env.PORT ?? 3001),
   WEB_ORIGIN: process.env.WEB_ORIGIN ?? "http://localhost:5173",
   DEFAULT_CURRENCY: process.env.DEFAULT_CURRENCY ?? "USD",
+  LOG_LEVEL: process.env.LOG_LEVEL ?? "info",
 };
 
 export const googleConfigured = (): boolean =>

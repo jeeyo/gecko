@@ -1,0 +1,13 @@
+apiVersion: v2
+name: gecko
+description: Touch-first home dashboard — Google Calendar, markdown notes, and local expenses.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - dashboard
+  - calendar
+  - personal
+home: https://github.com/jeeyo/gecko
+maintainers:
+  - name: jeeyo

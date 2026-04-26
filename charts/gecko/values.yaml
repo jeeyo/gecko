@@ -1,0 +1,142 @@
+# Default values for gecko.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Images for the API server and the nginx-served web SPA.
+image:
+  api:
+    repository: ghcr.io/youruser/gecko-api
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  web:
+    repository: ghcr.io/youruser/gecko-web
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# ── API (Bun + Elysia) ──────────────────────────────────────────────────────
+api:
+  replicaCount: 1
+  port: 3001
+  resources: {}
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   limits:
+  #     cpu: 500m
+  #     memory: 256Mi
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env:
+    # Defaults to https://{ingress.host} when ingress is enabled.
+    webOrigin: ""
+    defaultCurrency: "USD"
+    # A random 32-char string is generated at first install when left empty.
+    # Set an explicit value to keep it stable across upgrades.
+    sessionSecret: ""
+
+# ── Web SPA (nginx static) ──────────────────────────────────────────────────
+web:
+  replicaCount: 1
+  port: 80
+  resources: {}
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ── Google OAuth credentials ────────────────────────────────────────────────
+google:
+  # Set these OR point to an existing secret with existingSecret.
+  clientId: ""
+  clientSecret: ""
+  # Override the redirect URI; defaults to https://{ingress.host}/api/auth/google/callback.
+  redirectUri: ""
+  # Name of an existing Secret containing the Google credentials.
+  # The secret must have keys matching google.secretKeys.* below.
+  existingSecret: ""
+  secretKeys:
+    clientId: GOOGLE_CLIENT_ID
+    clientSecret: GOOGLE_CLIENT_SECRET
+    redirectUri: GOOGLE_REDIRECT_URI
+
+# ── Ingress ─────────────────────────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+  host: "gecko.example.com"
+  tls: []
+  #   - hosts:
+  #       - gecko.example.com
+  #     secretName: gecko-tls
+
+# ── Database ─────────────────────────────────────────────────────────────────
+postgres:
+  # ---- Option A: bundled StatefulSet (default, good for single-node / dev) ----
+  bundled:
+    enabled: true
+    image: "postgres:16-alpine"
+    database: "gecko"
+    user: "gecko"
+    # Auto-generated and stored in a Secret when left empty.
+    # IMPORTANT: set an explicit value for reproducible installs.
+    password: ""
+    storage: "5Gi"
+    storageClassName: ""
+    resources: {}
+
+  # ---- Option B: CloudNativePG Cluster ----------------------------------------
+  # Requires the CloudNativePG operator (https://cloudnative-pg.io) installed.
+  # Set bundled.enabled=false and cloudnativepg.enabled=true.
+  cloudnativepg:
+    enabled: false
+    # Number of Postgres instances in the cluster.
+    instances: 1
+    database: "gecko"
+    owner: "gecko"
+    storage: "5Gi"
+    storageClassName: ""
+    # Override the PostgreSQL image used by CNPG (leave empty for CNPG default).
+    imageName: ""
+    # Extra fields merged into the Cluster .spec (advanced use).
+    clusterSpec: {}
+    # If you have an existing CNPG cluster, set its name here to skip
+    # creating a new one. The chart will still reference the generated secret.
+    existingCluster: ""
+    # Override the CNPG-generated app secret name.
+    # Default: <clusterName>-app  (set by CNPG operator).
+    existingSecretName: ""
+
+  # ---- Option C: external Postgres --------------------------------------------
+  # Set both bundled.enabled=false and cloudnativepg.enabled=false,
+  # then provide an existing secret that contains DATABASE_URL.
+  external:
+    secretName: ""
+    secretKey: "DATABASE_URL"
+
+# ── Migration & seed Job ────────────────────────────────────────────────────
+migration:
+  enabled: true
+  # Helm hook annotations are always applied to the Job;
+  # set enabled=false only if you manage migrations out-of-band.
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
+  resources: {}
+  # Image used for the pg_isready init-container (must include pg_isready binary).
+  waitImage: "postgres:16-alpine"

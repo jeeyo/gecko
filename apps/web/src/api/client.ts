@@ -59,9 +59,10 @@ export type GoogleEvent = {
   attendees: { email: string; responseStatus: string | null }[];
 };
 
-export type AuthStatus =
+export type AuthStatus = (
   | { connected: true; configured: true; email?: string; selectedCalendarIds: string[] }
-  | { connected: false; configured: boolean; email?: string; selectedCalendarIds?: string[] };
+  | { connected: false; configured: boolean; email?: string; selectedCalendarIds?: string[] }
+) & { defaultCurrency: string };
 
 const BASE = "/api";
 

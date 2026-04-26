@@ -3,12 +3,14 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { Plus } from "lucide-react";
 import { useExpensesRange } from "@/hooks/useExpenses";
 import { useCategories } from "@/hooks/useCategories";
+import { useCurrency } from "@/hooks/useCurrency";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCents } from "@/lib/currency";
 
 export function ExpensesPage() {
   const nav = useNavigate();
+  const currency = useCurrency();
   const today = new Date();
   const from = format(startOfMonth(today), "yyyy-MM-dd");
   const to = format(endOfMonth(today), "yyyy-MM-dd");
@@ -54,7 +56,7 @@ export function ExpensesPage() {
                       {format(new Date(d + "T00:00:00"), "EEE, MMM d")}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {formatCents(dayTotal)}
+                      {formatCents(dayTotal, currency)}
                     </span>
                   </div>
                   <ul className="divide-y">

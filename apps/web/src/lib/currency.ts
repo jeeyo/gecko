@@ -1,4 +1,4 @@
-export function formatCents(cents: number, currency = "USD"): string {
+export function formatCents(cents: number, currency: string): string {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,

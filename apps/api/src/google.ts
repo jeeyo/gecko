@@ -72,12 +72,14 @@ export async function getAuthorizedClient() {
 }
 
 export async function authStatus() {
-  if (!googleConfigured()) return { connected: false, configured: false } as const;
+  if (!googleConfigured())
+    return { connected: false, configured: false, defaultCurrency: env.DEFAULT_CURRENCY } as const;
   const stored = await loadStoredTokens();
   return {
     connected: Boolean(stored?.refreshToken),
     configured: true,
     email: stored?.email ?? undefined,
     selectedCalendarIds: stored?.selectedCalendarIds ?? [],
+    defaultCurrency: env.DEFAULT_CURRENCY,
   } as const;
 }

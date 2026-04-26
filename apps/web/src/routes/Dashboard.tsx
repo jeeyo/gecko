@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useNotes } from "@/hooks/useNotes";
 import { useExpensesRange } from "@/hooks/useExpenses";
 import { useCategories } from "@/hooks/useCategories";
+import { useCurrency } from "@/hooks/useCurrency";
 import { formatCents } from "@/lib/currency";
 import { Plus } from "lucide-react";
 
 export function Dashboard() {
   const nav = useNavigate();
+  const currency = useCurrency();
   const today = new Date();
   const monthFrom = format(startOfMonth(today), "yyyy-MM-dd");
   const monthTo = format(endOfMonth(today), "yyyy-MM-dd");
@@ -84,7 +86,7 @@ export function Dashboard() {
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
                   <span className="text-sm text-muted-foreground">Total</span>
-                  <span className="text-lg font-semibold">{formatCents(total)}</span>
+                  <span className="text-lg font-semibold">{formatCents(total, currency)}</span>
                 </div>
                 <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
                   {categories.map((c) => {
@@ -95,7 +97,7 @@ export function Dashboard() {
                       <div
                         key={c.id}
                         style={{ width: `${pct}%`, backgroundColor: c.color }}
-                        title={`${c.name}: ${formatCents(v)}`}
+                        title={`${c.name}: ${formatCents(v, currency)}`}
                       />
                     );
                   })}
@@ -111,7 +113,7 @@ export function Dashboard() {
                         />
                         <span className="text-muted-foreground">{c.name}</span>
                         <span className="ml-auto font-medium">
-                          {formatCents(totalsByCategory[c.id])}
+                          {formatCents(totalsByCategory[c.id], currency)}
                         </span>
                       </li>
                     ))}

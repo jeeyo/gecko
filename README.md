@@ -53,5 +53,4 @@ Open the web app, go to **Settings → Connect Google**, complete consent, and y
 ```
 apps/api    Bun + Elysia + Drizzle (Postgres)
 apps/web    Vite + React + shadcn UI
-PLAN.md     Approved design doc
 ```

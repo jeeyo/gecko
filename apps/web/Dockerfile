@@ -11,6 +11,9 @@ COPY apps/web/vite.config.ts ./
 COPY apps/web/tailwind.config.ts ./
 COPY apps/web/postcss.config.js ./
 COPY apps/web/tsconfig*.json ./
+# tsconfig.app.json & tsconfig.node.json extend ../../tsconfig.base.json,
+# which from /build resolves to /tsconfig.base.json.
+COPY tsconfig.base.json /tsconfig.base.json
 COPY apps/web/src ./src
 
 RUN bun run build

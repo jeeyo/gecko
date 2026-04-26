@@ -6,11 +6,11 @@ fullnameOverride: ""
 # -- Images for the API server and the nginx-served web SPA.
 image:
   api:
-    repository: ghcr.io/youruser/gecko-api
+    repository: ghcr.io/jeeyo/gecko-api
     tag: "latest"
     pullPolicy: IfNotPresent
   web:
-    repository: ghcr.io/youruser/gecko-web
+    repository: ghcr.io/jeeyo/gecko-web
     tag: "latest"
     pullPolicy: IfNotPresent
 
@@ -101,31 +101,8 @@ postgres:
     storageClassName: ""
     resources: {}
 
-  # ---- Option B: CloudNativePG Cluster ----------------------------------------
-  # Requires the CloudNativePG operator (https://cloudnative-pg.io) installed.
-  # Set bundled.enabled=false and cloudnativepg.enabled=true.
-  cloudnativepg:
-    enabled: false
-    # Number of Postgres instances in the cluster.
-    instances: 1
-    database: "gecko"
-    owner: "gecko"
-    storage: "5Gi"
-    storageClassName: ""
-    # Override the PostgreSQL image used by CNPG (leave empty for CNPG default).
-    imageName: ""
-    # Extra fields merged into the Cluster .spec (advanced use).
-    clusterSpec: {}
-    # If you have an existing CNPG cluster, set its name here to skip
-    # creating a new one. The chart will still reference the generated secret.
-    existingCluster: ""
-    # Override the CNPG-generated app secret name.
-    # Default: <clusterName>-app  (set by CNPG operator).
-    existingSecretName: ""
-
-  # ---- Option C: external Postgres --------------------------------------------
-  # Set both bundled.enabled=false and cloudnativepg.enabled=false,
-  # then provide an existing secret that contains DATABASE_URL.
+  # ---- Option B: external Postgres --------------------------------------------
+  # Set bundled.enabled=false, then provide an existing secret that contains DATABASE_URL.
   external:
     secretName: ""
     secretKey: "DATABASE_URL"

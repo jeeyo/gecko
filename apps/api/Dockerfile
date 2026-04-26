@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM oven/bun:1.3-alpine AS base
+FROM oven/bun:1-alpine AS base
 WORKDIR /app
 
 # Install deps (all, not --production, so drizzle-kit is available for generate if needed)

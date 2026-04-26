@@ -1,0 +1,41 @@
+Gecko has been deployed!
+
+{{- if .Values.ingress.enabled }}
+{{- $scheme := "http" }}
+{{- if .Values.ingress.tls }}{{- $scheme = "https" }}{{- end }}
+
+Dashboard: {{ $scheme }}://{{ .Values.ingress.host }}/
+
+1. Connect Google Calendar at {{ $scheme }}://{{ .Values.ingress.host }}/settings
+{{- else }}
+
+Access the dashboard with:
+
+  kubectl port-forward -n {{ .Release.Namespace }} \
+    svc/{{ include "gecko.fullname" . }}-web 8080:{{ .Values.web.port }}
+
+Then open http://localhost:8080/
+
+The API is available at:
+  kubectl port-forward -n {{ .Release.Namespace }} \
+    svc/{{ include "gecko.fullname" . }}-api 3001:{{ .Values.api.port }}
+
+NOTE: Without Ingress the SPA's /api requests won't proxy to the API
+automatically. Either enable ingress or use an additional reverse proxy.
+{{- end }}
+
+{{- if .Values.postgres.cloudnativepg.enabled }}
+
+Database: CloudNativePG cluster {{ include "gecko.cnpgClusterName" . }}
+  App secret: {{ include "gecko.cnpgSecretName" . }}
+{{- else if .Values.postgres.bundled.enabled }}
+
+Database: bundled Postgres StatefulSet (single replica, not HA).
+  Secret: {{ include "gecko.fullname" . }}-postgres
+{{- end }}
+
+{{- if not .Values.google.clientId }}
+
+WARNING: Google OAuth is not configured (google.clientId is empty).
+  Set google.clientId and google.clientSecret to enable calendar sync.
+{{- end }}

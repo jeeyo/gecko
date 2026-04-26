@@ -1,0 +1,68 @@
+{{- if .Values.migration.enabled }}
+{{- $dbHost := include "gecko.dbHost" . }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "gecko.fullname" . }}-migrate-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "gecko.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migration
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    # Delete completed/failed jobs from previous revision before running.
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.migration.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels:
+        {{- include "gecko.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migration
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "gecko.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if $dbHost }}
+      initContainers:
+        - name: wait-for-db
+          image: {{ .Values.migration.waitImage | quote }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Postgres at {{ $dbHost }}:5432 ..."
+              until pg_isready -h {{ $dbHost }} -p 5432; do
+                sleep 3
+              done
+              echo "Postgres is ready."
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      {{- end }}
+      containers:
+        - name: migrate
+          image: {{ .Values.image.api.repository }}:{{ .Values.image.api.tag }}
+          imagePullPolicy: {{ .Values.image.api.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              bun src/db/migrate.ts && bun src/db/seed.ts
+          env:
+            {{- include "gecko.databaseUrlEnv" . | nindent 12 }}
+          {{- with .Values.migration.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

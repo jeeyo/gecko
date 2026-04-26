@@ -24,11 +24,7 @@ NOTE: Without Ingress the SPA's /api requests won't proxy to the API
 automatically. Either enable ingress or use an additional reverse proxy.
 {{- end }}
 
-{{- if .Values.postgres.cloudnativepg.enabled }}
-
-Database: CloudNativePG cluster {{ include "gecko.cnpgClusterName" . }}
-  App secret: {{ include "gecko.cnpgSecretName" . }}
-{{- else if .Values.postgres.bundled.enabled }}
+{{- if .Values.postgres.bundled.enabled }}
 
 Database: bundled Postgres StatefulSet (single replica, not HA).
   Secret: {{ include "gecko.fullname" . }}-postgres

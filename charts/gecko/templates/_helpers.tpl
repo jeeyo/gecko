@@ -60,28 +60,6 @@ ServiceAccount name.
 {{- end }}
 
 {{/*
-CNPG cluster name.
-*/}}
-{{- define "gecko.cnpgClusterName" -}}
-{{- if .Values.postgres.cloudnativepg.existingCluster }}
-{{- .Values.postgres.cloudnativepg.existingCluster }}
-{{- else }}
-{{- printf "%s-postgresql" (include "gecko.fullname" .) }}
-{{- end }}
-{{- end }}
-
-{{/*
-CNPG app secret name (created by CNPG operator as <cluster>-app).
-*/}}
-{{- define "gecko.cnpgSecretName" -}}
-{{- if .Values.postgres.cloudnativepg.existingSecretName }}
-{{- .Values.postgres.cloudnativepg.existingSecretName }}
-{{- else }}
-{{- printf "%s-app" (include "gecko.cnpgClusterName" .) }}
-{{- end }}
-{{- end }}
-
-{{/*
 DATABASE_URL env source.
 Produces a single `valueFrom` or (for bundled) `value` entry.
 */}}
@@ -92,17 +70,11 @@ Produces a single `valueFrom` or (for bundled) `value` entry.
     secretKeyRef:
       name: {{ printf "%s-postgres" (include "gecko.fullname" .) }}
       key: DATABASE_URL
-{{- else if .Values.postgres.cloudnativepg.enabled }}
-- name: DATABASE_URL
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "gecko.cnpgSecretName" . }}
-      key: uri
 {{- else }}
 - name: DATABASE_URL
   valueFrom:
     secretKeyRef:
-      name: {{ required "postgres.external.secretName is required when bundled and cloudnativepg are both disabled" .Values.postgres.external.secretName }}
+      name: {{ required "postgres.external.secretName is required when bundled is disabled" .Values.postgres.external.secretName }}
       key: {{ .Values.postgres.external.secretKey | default "DATABASE_URL" }}
 {{- end }}
 {{- end }}
@@ -113,8 +85,6 @@ Postgres host used by the migration init-container for pg_isready.
 {{- define "gecko.dbHost" -}}
 {{- if .Values.postgres.bundled.enabled }}
 {{- printf "%s-postgres" (include "gecko.fullname" .) }}
-{{- else if .Values.postgres.cloudnativepg.enabled }}
-{{- printf "%s-rw" (include "gecko.cnpgClusterName" .) }}
 {{- else }}
 {{- "" }}
 {{- end }}
@@ -150,11 +120,3 @@ Google redirect URI.
 {{- end }}
 {{- end }}
 
-{{/*
-Validate: bundled and cloudnativepg are mutually exclusive.
-*/}}
-{{- define "gecko.validateDb" -}}
-{{- if and .Values.postgres.bundled.enabled .Values.postgres.cloudnativepg.enabled }}
-{{- fail "postgres.bundled.enabled and postgres.cloudnativepg.enabled cannot both be true" }}
-{{- end }}
-{{- end }}
